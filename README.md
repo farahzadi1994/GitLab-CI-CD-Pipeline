@@ -114,6 +114,16 @@ html-pipeline/
 
 ### Dockerfile
 
+This Dockerfile builds the final deployment image using Apache (`httpd:2.4`) to serve the static HTML content. It's optimized for running a live container that will serve traffic in production.
+
+```Dockerfile
+FROM httpd:2.4
+COPY index.html /usr/local/apache2/htdocs/
+COPY version.txt /usr/local/apache2/htdocs/
+```
+
+> Note: While `httpd` is used here for deployment, the `test` stage in `.gitlab-ci.yml` uses `alpine` for simplicity and speed during validation. This distinction allows the pipeline to stay fast while keeping the production image reliable for serving.
+
 ```Dockerfile
 FROM httpd:2.4
 COPY index.html /usr/local/apache2/htdocs/
@@ -232,6 +242,22 @@ Access: `http://<server-ip>`
 ---
 
 ## 🔗 Bonus
+
+Here are several recommended extensions to further harden and productionize this pipeline:
+
+### 1. Health Check and Custom Domain
+
+Set up a basic HTTP health check endpoint using tools like `curl` or monitoring platforms. Map your server IP to a custom domain using DNS, and secure it with HTTPS using Let's Encrypt.
+
+### 2. Auto-Restart with `docker-compose` or `systemd`
+
+Instead of running containers manually via `docker run`, use `docker-compose` with a `restart: always` policy or create a `systemd` unit file to ensure automatic recovery after crashes or reboots.
+
+### 3. GitLab Notifications (Email/Slack)
+
+Use GitLab's [integrations](https://docs.gitlab.com/ee/user/project/integrations/) to send pipeline success/failure updates to your Slack channel or via email using GitLab CI/CD notifications.
+
+These improvements help transition the pipeline from a development setup to a more robust, production-ready delivery process.
 
 * Add `health check` or custom domain
 * Auto-restart with `docker-compose` or `systemd`
